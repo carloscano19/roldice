@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rastreador D100 — Desventuras en Tierras Peculiares</title>
+  <meta name="description" content="Calculadora de tiradas D100 para el sistema de juego de rol Desventuras en Tierras Peculiares (DTP). Calcula daño, críticos y pifias automáticamente." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚔️</span>
+        <div>
+          <h1 class="logo-title">Rastreador D100</h1>
+          <p class="logo-sub">Desventuras en Tierras Peculiares</p>
+        </div>
+      </div>
+      <div class="header-badge">
+        <span class="badge-dot"></span>
+        <span>Sistema DTP Rev. Abril 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="calculator-card">
+
+      <!-- ──────────────── ROW 1: Tipo ataque + Armadura ──────────────── -->
+      <div class="row-selects">
+        <div class="field-group" id="group-attack">
+          <label class="field-label" for="attack-type">
+            <span class="label-icon">⚔️</span> Tipo de Ataque
+          </label>
+          <div class="select-wrapper">
+            <select id="attack-type">
+              <option value="wat1">WAT-1 · Armas de Filo</option>
+              <option value="wat2">WAT-2 · Armas Contundentes</option>
+              <option value="wat3">WAT-3 · Armas a 2 Manos</option>
+              <option value="wat4">WAT-4 · Proyectiles</option>
+              <option value="wat5">WAT-5 · Garras y Dientes</option>
+              <option value="wat6">WAT-6 · Agarrar / Desequilibrar</option>
+              <option value="wat7">WAT-7 · Sin Armas (Manos/Pies)</option>
+              <option value="wat8">WAT-8 · Lanzamiento de Objetos</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <div class="attack-info" id="attack-info">
+            <span class="info-chip" id="critical-type-chip"></span>
+          </div>
+        </div>
+
+        <div class="field-group" id="group-armor">
+          <label class="field-label" for="armor-type">
+            <span class="label-icon">🛡️</span> Armadura del Defensor
+          </label>
+          <div class="select-wrapper">
+            <select id="armor-type">
+              <option value="sa">Sin Armadura</option>
+              <option value="cuero">Cuero</option>
+              <option value="cueroEnd">Cuero Endurecido</option>
+              <option value="cmalla">Cota de Malla</option>
+              <option value="coraza">Coraza</option>
+              <option value="pdur">Piel Dura</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────────────── ROW 2: Dado ──────────────── -->
+      <div class="row-dice">
+        <div class="field-group field-dice">
+          <label class="field-label" for="dice-roll">
+            <span class="label-icon">🎲</span> Resultado del Dado
+            <span class="field-hint">Tirada abierta: si sacas 95+ se vuelve a tirar y suma · máx 999</span>
+          </label>
+          <div class="dice-input-row">
+            <input
+              id="dice-roll"
+              type="number"
+              min="1"
+              max="999"
+              placeholder="Ej: 72"
+              autocomplete="off"
+            />
+            <button class="btn-roll" id="btn-roll" title="Lanzar dado automáticamente">
+              <span class="dice-face" id="dice-face">🎲</span>
+              <span>Tirar</span>
+            </button>
+          </div>
+          <div class="roll-breakdown" id="roll-breakdown"></div>
+        </div>
+      </div>
+
+      <!-- ──────────────── ROW 3: Bonificadores + Penalizadores ──────────────── -->
+      <div class="row-modifiers">
+        <!-- Bonificadores -->
+        <div class="modifier-card bonus-card">
+          <div class="modifier-header bonus-header">
+            <span class="modifier-icon">＋</span>
+            <span class="modifier-title">Bonificadores</span>
+          </div>
+          <div class="modifier-fields">
+            <div class="mini-field">
+              <label class="mini-label" for="bonus1">B1</label>
+              <input id="bonus1" class="mini-input bonus-input" type="number" value="0" min="0" max="9999" />
+            </div>
+            <div class="mini-field">
+              <label class="mini-label" for="bonus2">B2</label>
+              <input id="bonus2" class="mini-input bonus-input" type="number" value="0" min="0" max="9999" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Penalizadores -->
+        <div class="modifier-card penalty-card">
+          <div class="modifier-header penalty-header">
+            <span class="modifier-icon">－</span>
+            <span class="modifier-title">Penalizadores</span>
+          </div>
+          <div class="modifier-fields">
+            <div class="mini-field">
+              <label class="mini-label" for="penalty1">P1</label>
+              <input id="penalty1" class="mini-input penalty-input" type="number" value="0" min="0" max="9999" />
+            </div>
+            <div class="mini-field">
+              <label class="mini-label" for="penalty2">P2</label>
+              <input id="penalty2" class="mini-input penalty-input" type="number" value="0" min="0" max="9999" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────────────── RESULT ──────────────── -->
+      <div class="result-panel" id="result-panel">
+        <div class="result-top">
+          <div class="result-formula" id="result-formula">
+            <span class="formula-part dice-part" id="f-dice">—</span>
+            <span class="formula-op">+</span>
+            <span class="formula-part bonus-part" id="f-bonus">0</span>
+            <span class="formula-op">−</span>
+            <span class="formula-part penalty-part" id="f-penalty">0</span>
+            <span class="formula-eq">=</span>
+            <span class="formula-total" id="f-total">—</span>
+          </div>
+        </div>
+
+        <div class="result-outcome" id="result-outcome">
+          <div class="outcome-placeholder">
+            <p>Introduce una tirada para ver el resultado</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────────────── ACTIONS ──────────────── -->
+      <div class="row-actions">
+        <button class="btn-clear" id="btn-clear">
+          <span>↺</span> Limpiar
+        </button>
+        <div class="modifiers-tip">
+          <span class="tip-icon">ℹ️</span>
+          <span>T:-50 · A:-20 · B:-10 · C:+0 · D:+10 · E:+20</span>
+        </div>
+      </div>
+
+    </div><!-- /.calculator-card -->
+  </main>
+
+  <footer class="site-footer">
+    <p>Desventuras en Tierras Peculiares · Sistema DTP Rev. Abril 2026 · Rastreador no oficial</p>
+  </footer>
+
+  <script src="tables.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
