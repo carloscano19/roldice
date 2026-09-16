@@ -1098,6 +1098,34 @@ main.main {
   </style>
 </head>
 <body>
+  <!-- LOGIN OVERLAY -->
+  <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,11,14,0.96); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:999999; display:flex; align-items:center; justify-content:center; padding:1.5rem;">
+    <div style="background:var(--bg-card); border:2px solid var(--border-gold); border-radius:var(--r-md); padding:2.5rem 2rem; max-width:400px; width:100%; box-shadow:0 15px 40px rgba(0,0,0,0.85); text-align:center;">
+      <div style="font-size:3rem; margin-bottom:.5rem;">🛡️</div>
+      <h2 style="color:var(--gold-bright); font-family:var(--font-heading); font-size:1.6rem; margin:0 0 .3rem 0;">Acceso Restringido</h2>
+      <p style="color:var(--txt-muted); font-size:.85rem; margin:0 0 1.5rem 0;">Introduce tus credenciales para acceder a la aplicación de DTP.</p>
+      
+      <form id="form-login" style="display:flex; flex-direction:column; gap:1.1rem; text-align:left;">
+        <div>
+          <label style="font-size:.8rem; color:var(--gold-bright); font-weight:700; display:block; margin-bottom:.35rem;">Usuario:</label>
+          <input type="text" id="login-user" required autocomplete="username" placeholder="Nombre de usuario" style="width:100%; padding:.7rem 1rem; background:var(--bg-input); border:1px solid var(--border-gold-subtle); border-radius:var(--r-sm); color:#ffffff; font-size:.95rem;" />
+        </div>
+        <div>
+          <label style="font-size:.8rem; color:var(--gold-bright); font-weight:700; display:block; margin-bottom:.35rem;">Contraseña:</label>
+          <input type="password" id="login-pass" required autocomplete="current-password" placeholder="Contraseña" style="width:100%; padding:.7rem 1rem; background:var(--bg-input); border:1px solid var(--border-gold-subtle); border-radius:var(--r-sm); color:#ffffff; font-size:.95rem;" />
+        </div>
+        
+        <div id="login-error" style="display:none; color:var(--crimson); font-size:.85rem; font-weight:700; text-align:center; padding:.2rem;">
+          ❌ Usuario o contraseña incorrectos.
+        </div>
+
+        <button type="submit" style="margin-top:.4rem; width:100%; padding:.85rem; background:linear-gradient(135deg, var(--gold-dark), var(--gold-bright)); color:#0a0b0e; border:none; border-radius:var(--r-sm); font-weight:800; font-size:1rem; cursor:pointer; box-shadow:0 4px 15px rgba(212,175,55,0.35);">
+          🗝️ Entrar a la App
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="particles" id="particles"></div>
 
   <!-- Header -->
@@ -1109,6 +1137,12 @@ main.main {
           <h1 class="logo-title">Rastreador D100</h1>
           <p class="logo-sub">Desventuras en Tierras Peculiares</p>
         </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:.8rem;">
+        <button id="btn-logout" title="Cerrar Sesión" style="display:none; background:rgba(212,175,55,0.1); border:1px solid var(--border-gold-subtle); color:var(--txt-muted); padding:.35rem .75rem; border-radius:var(--r-sm); cursor:pointer; font-size:.78rem; font-weight:600;">
+          🔒 Salir
+        </button>
       </div>
 
       <!-- Navigation Tabs -->
@@ -5146,6 +5180,72 @@ calculate();
   window.saveGeneratedTobestiary = saveGeneratedTobestiary;
   window.renderMonsterGenerator = renderMonsterGenerator;
 
+})();
+
+// ── AUTHENTICATION MODULE (SHA-256) ─────────────────────────────────────────
+(function initAuth() {
+  const AUTH_HASH = '8133a21c42fb18bda72389d7bbfc53f50e4482ec915ae054daa18def213f9943';
+
+  async function computeHash(str) {
+    if (window.crypto && crypto.subtle) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // Simple fallback if crypto.subtle unavailable
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return String(hash);
+  }
+
+  function isAuthorized() {
+    return localStorage.getItem('dtp_auth_token') === AUTH_HASH;
+  }
+
+  function updateAuthUI() {
+    const overlay = document.getElementById('login-overlay');
+    const logoutBtn = document.getElementById('btn-logout');
+    if (isAuthorized()) {
+      if (overlay) overlay.style.display = 'none';
+      if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+    } else {
+      if (overlay) overlay.style.display = 'flex';
+      if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+  }
+
+  document.getElementById('form-login')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userIn = document.getElementById('login-user')?.value.trim().toLowerCase();
+    const passIn = document.getElementById('login-pass')?.value.trim();
+    const errEl = document.getElementById('login-error');
+
+    const inputHash = await computeHash(userIn + ':' + passIn);
+    if (inputHash === AUTH_HASH) {
+      localStorage.setItem('dtp_auth_token', AUTH_HASH);
+      if (errEl) errEl.style.display = 'none';
+      updateAuthUI();
+    } else {
+      if (errEl) {
+        errEl.style.display = 'block';
+        setTimeout(() => { if (errEl) errEl.style.display = 'none'; }, 4000);
+      }
+    }
+  });
+
+  document.getElementById('btn-logout')?.addEventListener('click', () => {
+    localStorage.removeItem('dtp_auth_token');
+    const passIn = document.getElementById('login-pass');
+    if (passIn) passIn.value = '';
+    updateAuthUI();
+  });
+
+  // Verify auth on page load
+  updateAuthUI();
 })();
   </script>
 </body>
