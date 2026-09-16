@@ -1,24 +1,22 @@
 /**
  * app.js — DTP Rastreador D100
- * Lógica principal de la calculadora
+ * Lógica principal de la calculadora (con soporte para modo magia WSD)
  */
 
 // ── Constantes ──────────────────────────────────────────────────────────────
-const PIFIA_THRESHOLD   = 19;  // 01-19 = Pifia (tirada SM sin modificar)
-const OPEN_THRESHOLD    = 95;  // 95+ = tirada abierta (volver a tirar y sumar)
+const PIFIA_THRESHOLD   = 19;
+const OPEN_THRESHOLD    = 95;
 const MAX_ROLL          = 999;
 
-// Modificadores de tirada de críticos según letra
 const CRIT_MODIFIERS = { T: -50, A: -20, B: -10, C: 0, D: 10, E: 20 };
 
-// Nombres de armadura para mostrar
 const ARMOR_NAMES = {
   sa:       'Sin Armadura',
   cuero:    'Cuero',
   cueroEnd: 'Cuero Endurecido',
   cmalla:   'Cota de Malla',
   coraza:   'Coraza',
-  pdur:     'Piel Dura',
+  pdur:     'Piel Dura / Criatura',
 };
 
 // ── DOM refs ─────────────────────────────────────────────────────────────────
@@ -39,9 +37,22 @@ const elFBonus      = document.getElementById('f-bonus');
 const elFPenalty    = document.getElementById('f-penalty');
 const elFTotal      = document.getElementById('f-total');
 const elOutcome     = document.getElementById('result-outcome');
+const elMagicPanel  = document.getElementById('magic-panel');
+const elMagicTotal  = document.getElementById('magic-mod-total');
+const elGroupArmor  = document.getElementById('group-armor');
 
 // ── State ─────────────────────────────────────────────────────────────────
-let rollBreakdownParts = [];  // historial de sub-tiradas para mostrar
+let rollBreakdownParts = [];
+
+// Estado de modificadores de magia (WSD-1)
+const magicMods = {
+  tension:   0,
+  distancia: 0,
+  tamano:    0,
+  prep:      -30,
+  critType:  'Impacto + frío',
+  crit:      'C',
+};
 
 // ── Particles background ──────────────────────────────────────────────────
 (function initParticles() {
@@ -62,6 +73,49 @@ let rollBreakdownParts = [];  // historial de sub-tiradas para mostrar
   }
 })();
 
+// ── Magic panel: inicializar botones de píldora ───────────────────────────
+function initMagicButtons() {
+  // Grupos con valor numérico: tension, distancia, tamano, prep
+  ['tension', 'distancia', 'tamano', 'prep'].forEach(group => {
+    const container = document.getElementById(`mg-${group}`);
+    if (!container) return;
+    container.addEventListener('click', e => {
+      const btn = e.target.closest('.magic-opt');
+      if (!btn) return;
+      container.querySelectorAll('.magic-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      magicMods[group] = parseInt(btn.dataset.val, 10);
+      updateMagicTotal();
+      calculate();
+    });
+  });
+
+  // Tipo de sortilegio (WSD-2) — sin valor numérico, solo critType
+  const tipoContainer = document.getElementById('mg-tipo');
+  if (tipoContainer) {
+    tipoContainer.addEventListener('click', e => {
+      const btn = e.target.closest('.magic-opt');
+      if (!btn) return;
+      tipoContainer.querySelectorAll('.magic-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      magicMods.critType = btn.dataset.crittype;
+      magicMods.crit     = btn.dataset.crit || 'C';
+      calculate();
+    });
+  }
+}
+
+function updateMagicTotal() {
+  const total = magicMods.tension + magicMods.distancia + magicMods.tamano + magicMods.prep;
+  const sign  = total >= 0 ? '+' : '';
+  elMagicTotal.textContent = sign + total;
+  elMagicTotal.style.color = total < 0 ? '#e85c4d' : total > 0 ? '#58d6a4' : '#c39bd3';
+}
+
+function getMagicModTotal() {
+  return magicMods.tension + magicMods.distancia + magicMods.tamano + magicMods.prep;
+}
+
 // ── Tirada abierta ─────────────────────────────────────────────────────────
 function rollOpenDice() {
   let total = 0;
@@ -72,13 +126,12 @@ function rollOpenDice() {
     parts.push({ value: r, isOpen: r >= OPEN_THRESHOLD });
     total = Math.min(total + r, MAX_ROLL);
     iter++;
-    if (iter > 20) break; // safety
+    if (iter > 20) break;
   } while (parts[parts.length - 1].isOpen && total < MAX_ROLL);
-
   return { total, parts };
 }
 
-// ── Actualizar breakdown visual ────────────────────────────────────────────
+// ── Actualizar breakdown visual de la tirada ──────────────────────────────
 function renderBreakdown(parts) {
   elBreakdown.innerHTML = '';
   if (!parts || parts.length === 0) return;
@@ -102,26 +155,47 @@ function renderBreakdown(parts) {
   }
 }
 
+// ── Detectar modo magia y mostrar/ocultar paneles ──────────────────────────
+function isMagicMode() {
+  return elAttack.value === 'wsd';
+}
+
+function updateMode() {
+  if (isMagicMode()) {
+    elMagicPanel.style.display = 'block';
+    updateMagicTotal();
+  } else {
+    elMagicPanel.style.display = 'none';
+  }
+}
+
 // ── Actualizar chip de tipo de crítico ───────────────────────────────────
 function updateAttackMeta() {
-  const key = elAttack.value;
+  const key  = elAttack.value;
   const meta = window.DTP.TABLE_META[key];
   if (!meta) return;
-  elCritChip.textContent = meta.critEmoji + ' Crítico: ' + meta.critType;
+  if (isMagicMode()) {
+    elCritChip.textContent = '✨ Sortilegio · Crítico según WSD-2';
+  } else {
+    elCritChip.textContent = meta.critEmoji + ' Crítico: ' + meta.critType;
+  }
 }
 
 // ── Calcular y renderizar resultado ──────────────────────────────────────
 function calculate() {
-  const diceVal   = parseInt(elDice.value, 10);
-  const b1        = parseInt(elBonus1.value, 10)   || 0;
-  const b2        = parseInt(elBonus2.value, 10)   || 0;
-  const p1        = parseInt(elPenalty1.value, 10) || 0;
-  const p2        = parseInt(elPenalty2.value, 10) || 0;
+  const diceVal      = parseInt(elDice.value, 10);
+  const b1           = parseInt(elBonus1.value,   10) || 0;
+  const b2           = parseInt(elBonus2.value,   10) || 0;
+  const p1           = parseInt(elPenalty1.value, 10) || 0;
+  const p2           = parseInt(elPenalty2.value, 10) || 0;
   const totalBonus   = b1 + b2;
   const totalPenalty = p1 + p2;
 
-  // Actualizar fórmula
-  elFBonus.textContent   = totalBonus;
+  // En modo magia los modificadores WSD-1 se suman automáticamente como bonus
+  const magicBonus   = isMagicMode() ? getMagicModTotal() : 0;
+  const displayBonus = totalBonus + magicBonus;
+
+  elFBonus.textContent   = displayBonus;
   elFPenalty.textContent = totalPenalty;
 
   if (isNaN(diceVal) || elDice.value === '') {
@@ -132,33 +206,35 @@ function calculate() {
     return;
   }
 
-  const finalRoll = Math.max(1, diceVal + totalBonus - totalPenalty);
+  const finalRoll = Math.max(1, diceVal + displayBonus - totalPenalty);
   elFDice.textContent  = diceVal;
   elFTotal.textContent = finalRoll;
 
-  // Consultar tabla
   const tableKey = elAttack.value;
   const armorKey = elArmor.value;
-  const result   = window.DTP.getAttackResult(tableKey, armorKey, diceVal); // la tirada SM (sin modificar) determina pifia
-  const resultFinal = window.DTP.getAttackResult(tableKey, armorKey, finalRoll); // resultado final para daño
 
-  // La pifia se detecta con la tirada sin modificar (SM)
-  // Si la tirada SM (dado puro) es ≤ 19 → Pifia independientemente del final
-  const isRawPifia = diceVal <= PIFIA_THRESHOLD;
-
-  if (isRawPifia || result.type === 'pifia') {
-    renderPifia(result.meta);
+  // Pifia: se detecta con la tirada SM (dado puro) ≤19
+  if (diceVal <= PIFIA_THRESHOLD) {
+    renderPifia(window.DTP.TABLE_META[tableKey]);
     elResultPanel.className = 'result-panel glow-pifia';
-  } else if (resultFinal.type === 'fail' || resultFinal.type === 'hit' && resultFinal.pv === 0) {
+    return;
+  }
+
+  const resultFinal = window.DTP.getAttackResult(tableKey, armorKey, finalRoll);
+
+  if (resultFinal.type === 'pifia') {
+    renderPifia(resultFinal.meta);
+    elResultPanel.className = 'result-panel glow-pifia';
+  } else if (resultFinal.type === 'fail' || (resultFinal.type === 'hit' && resultFinal.pv === 0)) {
     renderHit(resultFinal, armorKey, finalRoll);
     elResultPanel.className = 'result-panel glow-fail';
   } else {
-    renderHit(resultFinal, armorKey, finalRoll);
-    if (resultFinal.crit) {
-      elResultPanel.className = 'result-panel glow-crit';
-    } else {
-      elResultPanel.className = 'result-panel';
+    // En modo magia, el tipo de crítico lo da WSD-2 (tipo de sortilegio)
+    if (isMagicMode() && resultFinal.crit) {
+      resultFinal.critTypeOverride = magicMods.critType;
     }
+    renderHit(resultFinal, armorKey, finalRoll);
+    elResultPanel.className = resultFinal.crit ? 'result-panel glow-crit' : 'result-panel';
   }
 }
 
@@ -171,25 +247,33 @@ function renderOutcomePlaceholder() {
 }
 
 function renderPifia(meta) {
+  const isMagic = meta?.isMagic;
   elOutcome.innerHTML = `
     <div class="outcome-main">
       <div class="status-row">
         <span class="status-badge badge-pifia">💀 ¡PIFIA!</span>
-        <span class="status-badge badge-fail">Tirada en tabla de pifias</span>
+        <span class="status-badge badge-fail">Tirada en tabla de ${isMagic ? 'fallos de hechizo' : 'pifias'}</span>
       </div>
       <div class="outcome-detail">
         Tirada sin modificar ≤ 19 = <strong>Pifia automática</strong>.
-        Tira en la tabla <strong>WFP-${meta?.pifiaTable === 'proyectil' ? '2 (Proyectil)' : '1 (Empuñada)'}</strong>
-        con los modificadores correspondientes.
-        <br><br>
-        <em>Modificadores a la pifia:</em>
-        Arma contundente: −20 · Arma de filo: −10 · A 2 manos: ±0 · Asta: +10 · Montado/Trabuquete: +20
+        ${isMagic
+          ? `Tira en la tabla <strong>WFP-3 (Fallos de Hechizos)</strong>.<br>
+             <em>Mod. al fallo por tensión:</em>
+             Muy alta: −10 · Alta: −5 · Media: ±0 · Baja: +5 · Muy baja: +15`
+          : `Tira en la tabla <strong>WFP-${meta?.pifiaTable === 'proyectil' ? '2 (Proyectil)' : '1 (Empuñada)'}</strong>.<br>
+             <em>Mod. a la pifia:</em>
+             Contundente: −20 · Filo: −10 · 2 manos: ±0 · Asta: +10 · Montado: +20`
+        }
       </div>
     </div>`;
 }
 
 function renderHit(result, armorKey, finalRoll) {
   const armorName = ARMOR_NAMES[armorKey] || armorKey;
+  const critType  = result.critTypeOverride ||
+    (isMagicMode()
+      ? magicMods.critType
+      : window.DTP.TABLE_META[elAttack.value]?.critType) || '';
 
   if (result.type === 'fail') {
     elOutcome.innerHTML = `
@@ -219,7 +303,6 @@ function renderHit(result, armorKey, finalRoll) {
     return;
   }
 
-  // Daño normal o crítico
   const critClass  = result.crit ? `badge-crit-${result.crit}` : '';
   const critMod    = result.crit ? CRIT_MODIFIERS[result.crit] : null;
   const critModStr = critMod !== null ? (critMod >= 0 ? `+${critMod}` : `${critMod}`) : '';
@@ -233,7 +316,7 @@ function renderHit(result, armorKey, finalRoll) {
     : '';
 
   const critDetail = result.crit
-    ? `<br><br>Tirar en la tabla de críticos correspondiente
+    ? `<br><br>Tirar en la tabla de críticos de <strong>${critType}</strong>
        con modificador <strong>${critModStr}</strong> (Crítico ${result.crit}).`
     : '';
 
@@ -252,6 +335,7 @@ function renderHit(result, armorKey, finalRoll) {
 
 // ── Event listeners ───────────────────────────────────────────────────────
 elAttack.addEventListener('change', () => {
+  updateMode();
   updateAttackMeta();
   calculate();
 });
@@ -273,30 +357,75 @@ elBtnRoll.addEventListener('click', () => {
   rollBreakdownParts = parts;
   elDice.value = total;
   renderBreakdown(parts);
-
-  // Animate dice
   const face = document.getElementById('dice-face');
   face.style.transform = 'rotate(720deg) scale(1.3)';
   setTimeout(() => { face.style.transform = ''; }, 500);
-
   calculate();
 });
 
 elBtnClear.addEventListener('click', () => {
-  elDice.value    = '';
-  elBonus1.value  = '0';
-  elBonus2.value  = '0';
+  elDice.value     = '';
+  elBonus1.value   = '0';
+  elBonus2.value   = '0';
   elPenalty1.value = '0';
   elPenalty2.value = '0';
   rollBreakdownParts = [];
   elBreakdown.innerHTML = '';
   calculate();
-  // Flash effect
   elDice.style.transition = 'border-color .1s';
   elDice.style.borderColor = 'rgba(192,57,43,.6)';
   setTimeout(() => { elDice.style.borderColor = ''; }, 400);
 });
 
+// ── Tab Navigation (App / TC / MM) ────────────────────────────────────────
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-view-content').forEach(view => {
+    view.style.display = (view.id === `view-tab-${tabId}`) ? 'block' : 'none';
+  });
+  if (tabId === 'tc') {
+    renderFullTCTable();
+  }
+}
+
+function renderFullTCTable() {
+  const tbody = document.getElementById('tc-table-body');
+  if (!tbody) return;
+  const key = document.getElementById('tc-table-select')?.value || 'tajo';
+  const critData = window.DTP?.CRIT_TABLES ? window.DTP.CRIT_TABLES[key] : null;
+  if (!critData) return;
+
+  tbody.innerHTML = '';
+  critData.rows.forEach(row => {
+    const tr = document.createElement('tr');
+    const minVal = row[0] > 0 ? row[0] : '≤ ' + row[1];
+    const rangeStr = (row[0] === row[1]) ? `${row[0]}` : `${minVal} – ${row[1]}`;
+    tr.innerHTML = `
+      <td><strong>${rangeStr}</strong></td>
+      <td>${row[2]}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+document.querySelectorAll('.btn-nav-back').forEach(btn => {
+  btn.addEventListener('click', () => switchTab('app'));
+});
+
+const elTCSelect = document.getElementById('tc-table-select');
+if (elTCSelect) {
+  elTCSelect.addEventListener('change', renderFullTCTable);
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
+initMagicButtons();
+updateMode();
 updateAttackMeta();
 calculate();
+

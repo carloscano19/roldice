@@ -1,0 +1,6 @@
+.DS_Store
+*.zip
+test_*.js
+temp_test.js
+build_compendium.py
+upgrade_bestiary.py
