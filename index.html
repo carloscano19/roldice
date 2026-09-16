@@ -1564,9 +1564,16 @@ main.main {
             <button class="btn-back-app btn-nav-back"><span>← Volver a la Calculadora</span></button>
           </div>
 
-          <div style="display:flex; gap:.8rem; margin-bottom:1.2rem; flex-wrap:wrap;">
-            <button id="btn-subtab-view" class="tc-btn active" style="padding:.5rem 1rem;"><span>📖 Consultar Bestiario</span></button>
-            <button id="btn-subtab-add" class="tc-btn" style="padding:.5rem 1rem;"><span>➕ Añadir Nuevo Monstruo</span></button>
+          <div style="display:flex; gap:.8rem; margin-bottom:1.2rem; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+            <div style="display:flex; gap:.8rem; flex-wrap:wrap;">
+              <button id="btn-subtab-view" class="tc-btn active" style="padding:.5rem 1rem;"><span>📖 Consultar Bestiario</span></button>
+              <button id="btn-subtab-add" class="tc-btn" style="padding:.5rem 1rem;"><span>➕ Añadir Nuevo Monstruo</span></button>
+            </div>
+            <div id="bestiary-cloud-status" style="font-size:.78rem; color:var(--txt-muted); display:flex; align-items:center; gap:.5rem; padding:.35rem .75rem; border-radius:var(--r-sm); background:rgba(0,0,0,0.25); border:1px solid var(--border-gold-subtle);">
+              <span id="bestiary-cloud-dot" style="width:8px; height:8px; border-radius:50%; background:#27ae60; display:inline-block;"></span>
+              <span id="bestiary-cloud-text">Nube Supabase: Conectada</span>
+              <button type="button" id="btn-cloud-sync-now" title="Sincronizar ahora con Supabase" style="background:none; border:none; color:var(--gold-bright); cursor:pointer; font-size:.85rem; padding:0 2px;">🔄</button>
+            </div>
           </div>
 
           <!-- SUBTAB 1: VIEW BESTIARY -->
@@ -3616,6 +3623,121 @@ calculate();
     }
   ];
 
+  // ── SUPABASE CLOUD SYNC MODULE ─────────────────────────────────────────────
+  const DTP_CLOUD = {
+    url: 'https://dfyierjgonxlubmqqbyk.supabase.co/rest/v1/bestiary',
+    key: 'sb_publishable_Id-totxcL_mXSkr_JPBDkA_ishHpqCw',
+    _synced: false,
+    getHeaders: function() {
+      return {
+        'apikey': this.key,
+        'Authorization': 'Bearer ' + this.key,
+        'Content-Type': 'application/json'
+      };
+    },
+    updateStatus: function(state, text) {
+      const dot = document.getElementById('bestiary-cloud-dot');
+      const label = document.getElementById('bestiary-cloud-text');
+      if (!dot || !label) return;
+      if (state === 'connected') {
+        dot.style.background = '#27ae60';
+        label.textContent = text || 'Nube Supabase: Conectada';
+      } else if (state === 'syncing') {
+        dot.style.background = '#f1c40f';
+        label.textContent = text || 'Nube Supabase: Sincronizando...';
+      } else {
+        dot.style.background = '#e74c3c';
+        label.textContent = text || 'Nube Supabase: Modo local';
+      }
+    },
+    fetchAll: async function() {
+      try {
+        this.updateStatus('syncing', 'Sincronizando con Supabase...');
+        const res = await fetch(this.url + '?select=*', { headers: this.getHeaders() });
+        if (!res.ok) throw new Error('Status ' + res.status);
+        const rows = await res.json();
+        this.updateStatus('connected', 'Nube Supabase: Conectada');
+        return rows.map(function(r) { return r.data || r; });
+      } catch (e) {
+        console.warn('DTP Cloud offline / error:', e);
+        this.updateStatus('offline', 'Nube Supabase: Modo local');
+        return null;
+      }
+    },
+    upsert: async function(monster) {
+      try {
+        this.updateStatus('syncing', 'Guardando en Supabase...');
+        const headers = Object.assign({}, this.getHeaders(), { 'Prefer': 'resolution=merge-duplicates' });
+        const res = await fetch(this.url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({ id: monster.id, name: monster.name, data: monster })
+        });
+        if (!res.ok) throw new Error('Status ' + res.status);
+        this.updateStatus('connected', 'Nube Supabase: Guardado');
+      } catch (e) {
+        console.warn('DTP Cloud upsert error:', e);
+        this.updateStatus('offline', 'Guardado en local (sin red)');
+      }
+    },
+    delete: async function(monsterId) {
+      try {
+        this.updateStatus('syncing', 'Borrando de Supabase...');
+        const res = await fetch(this.url + '?id=eq.' + encodeURIComponent(monsterId), {
+          method: 'DELETE',
+          headers: this.getHeaders()
+        });
+        if (!res.ok) throw new Error('Status ' + res.status);
+        this.updateStatus('connected', 'Nube Supabase: Actualizada');
+      } catch (e) {
+        console.warn('DTP Cloud delete error:', e);
+        this.updateStatus('offline', 'Borrado solo en local');
+      }
+    },
+    syncOnStartup: async function(force) {
+      const cloudMonsters = await this.fetchAll();
+      if (!cloudMonsters) return;
+
+      var stored = [];
+      try {
+        stored = JSON.parse(localStorage.getItem('dtp_custom_bestiary') || '[]');
+      } catch(e) { stored = []; }
+
+      var changed = false;
+
+      // 1. Merge monsters from Supabase into local storage
+      cloudMonsters.forEach(function(cm) {
+        var idx = stored.findIndex(function(m) { return m.id === cm.id; });
+        if (idx === -1) {
+          stored.push(cm);
+          changed = true;
+        } else {
+          stored[idx] = cm;
+          changed = true;
+        }
+      });
+
+      // 2. Upload any local custom monsters that are not yet in Supabase
+      var self = this;
+      stored.forEach(function(lm) {
+        var existsInCloud = cloudMonsters.some(function(cm) { return cm.id === lm.id; });
+        if (!existsInCloud) {
+          self.upsert(lm);
+        }
+      });
+
+      if (changed) {
+        try {
+          localStorage.setItem('dtp_custom_bestiary', JSON.stringify(stored));
+        } catch(e) {}
+        if (typeof updateBestiaryUI === 'function') {
+          updateBestiaryUI();
+        }
+      }
+    }
+  };
+  window.DTP_CLOUD = DTP_CLOUD;
+
   function bestiaryGetAll() {
     // Legacy cleanup of blocked initial monsters
     try {
@@ -3659,6 +3781,8 @@ calculate();
       var blocked = JSON.parse(localStorage.getItem('dtp_blocked_monsters') || '[]');
       if (blocked.indexOf(monsterId) === -1) blocked.push(monsterId);
       localStorage.setItem('dtp_blocked_monsters', JSON.stringify(blocked));
+
+      if (window.DTP_CLOUD) window.DTP_CLOUD.delete(monsterId);
 
       initBestiaryModule();
     } catch(e) {}
@@ -4026,6 +4150,16 @@ calculate();
       });
     }
 
+    var btnSync = document.getElementById('btn-cloud-sync-now');
+    if (btnSync && !btnSync.dataset.bound) {
+      btnSync.dataset.bound = '1';
+      btnSync.addEventListener('click', function() {
+        if (window.DTP_CLOUD) {
+          window.DTP_CLOUD.syncOnStartup(true);
+        }
+      });
+    }
+
     var form = document.getElementById('form-add-monster');
     if (form) {
       form.onsubmit = function(e) {
@@ -4095,6 +4229,8 @@ calculate();
           blocked = blocked.filter(function(id) { return id !== monsterId; });
           localStorage.setItem('dtp_blocked_monsters', JSON.stringify(blocked));
 
+          if (window.DTP_CLOUD) window.DTP_CLOUD.upsert(newM);
+
           form.reset();
           document.getElementById('add-m-edit-id').value = '';
           var titleEl = document.getElementById('add-m-form-title');
@@ -4140,6 +4276,10 @@ calculate();
   function initBestiaryModule() {
     initBestiaryEvents();
     updateBestiaryUI();
+    if (window.DTP_CLOUD && !window.DTP_CLOUD._synced) {
+      window.DTP_CLOUD._synced = true;
+      window.DTP_CLOUD.syncOnStartup();
+    }
   }
   window.initBestiaryModule = initBestiaryModule;
 
@@ -5149,6 +5289,7 @@ calculate();
         stored.push(lastGenerated);
       }
       localStorage.setItem('dtp_custom_bestiary', JSON.stringify(stored));
+      if (window.DTP_CLOUD) window.DTP_CLOUD.upsert(lastGenerated);
       const msg = document.getElementById('genmon-save-msg');
       if (msg) { msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 3000); }
       // Fast refresh of bestiary dropdown selecting the newly saved monster!
