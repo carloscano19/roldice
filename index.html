@@ -1659,8 +1659,18 @@ Si saca crítico paraliza 1 turno..."></textarea>
                       <div>BDM: <input type="number" id="add-min-bdm" class="cr-attr-in" value="10" /></div>
                       <div>MM: <input type="number" id="add-min-mm" class="cr-attr-in" value="15" /></div>
                       <div>INI: <input type="number" id="add-min-ini" class="cr-attr-in" value="0" /></div>
-                      <div>PV Mín: <input type="number" id="add-min-pv1" class="cr-attr-in" value="15" /></div>
-                      <div>PV Máx: <input type="number" id="add-min-pv2" class="cr-attr-in" value="20" /></div>
+                      <div style="grid-column: 1 / -1; background: rgba(39,174,122,0.12); padding: .5rem .7rem; border-radius: var(--r-sm); border: 1px solid rgba(39,174,122,0.3); margin: .2rem 0;">
+                        <label style="display:block; font-size:.78rem; color:var(--jade); font-weight:700; margin-bottom:.35rem;">
+                          🛡️ Resistencia al daño (Turnos para morir):
+                        </label>
+                        <div style="display:flex; align-items:center; gap:.4rem; font-size:.82rem;">
+                          <span>Entre</span>
+                          <input type="number" id="add-min-pv1" class="cr-attr-in" style="width:52px; text-align:center; padding:.3rem; font-weight:700;" value="1" min="1" max="99" />
+                          <span>y</span>
+                          <input type="number" id="add-min-pv2" class="cr-attr-in" style="width:52px; text-align:center; padding:.3rem; font-weight:700;" value="2" min="1" max="99" />
+                          <span style="color:var(--txt-muted);">turnos para morir</span>
+                        </div>
+                      </div>
                       <div>BE (Elocu.): <select id="add-min-be" class="cr-select" style="width:100%; padding:.2rem; font-size:.78rem;"><option value="-">-</option><option value="Menso">Menso</option><option value="Inútil">Inútil</option><option value="Tonto">Tonto</option><option value="Normal" selected>Normal</option><option value="Listo">Listo</option><option value="Muy listo">Muy listo</option><option value="Brillante">Brillante</option><option value="Excelso">Excelso</option><option value="Cumlaude">Cumlaude</option></select></div>
                       <div>BI (Intim.): <select id="add-min-bi" class="cr-select" style="width:100%; padding:.2rem; font-size:.78rem;"><option value="-">-</option><option value="Lucerito">Lucerito</option><option value="Gallina">Gallina</option><option value="Asustadizo">Asustadizo</option><option value="Normal" selected>Normal</option><option value="Intimidante">Intimidante</option><option value="Muy intimidante">Muy intimidante</option><option value="Terrible">Terrible</option><option value="Terrorífico">Terrorífico</option><option value="Demoníaco">Demoníaco</option></select></div>
                       <div>Coste Enem: <input type="number" id="add-min-ce" class="cr-attr-in" value="80" /></div>
@@ -1679,8 +1689,18 @@ Si saca crítico paraliza 1 turno..."></textarea>
                       <div>BDM: <input type="number" id="add-max-bdm" class="cr-attr-in" value="90" /></div>
                       <div>MM: <input type="number" id="add-max-mm" class="cr-attr-in" value="75" /></div>
                       <div>INI: <input type="number" id="add-max-ini" class="cr-attr-in" value="0" /></div>
-                      <div>PV Mín: <input type="number" id="add-max-pv1" class="cr-attr-in" value="60" /></div>
-                      <div>PV Máx: <input type="number" id="add-max-pv2" class="cr-attr-in" value="70" /></div>
+                      <div style="grid-column: 1 / -1; background: rgba(192,57,43,0.12); padding: .5rem .7rem; border-radius: var(--r-sm); border: 1px solid rgba(192,57,43,0.3); margin: .2rem 0;">
+                        <label style="display:block; font-size:.78rem; color:var(--crimson); font-weight:700; margin-bottom:.35rem;">
+                          🛡️ Resistencia al daño (Turnos para morir):
+                        </label>
+                        <div style="display:flex; align-items:center; gap:.4rem; font-size:.82rem;">
+                          <span>Entre</span>
+                          <input type="number" id="add-max-pv1" class="cr-attr-in" style="width:52px; text-align:center; padding:.3rem; font-weight:700;" value="4" min="1" max="99" />
+                          <span>y</span>
+                          <input type="number" id="add-max-pv2" class="cr-attr-in" style="width:52px; text-align:center; padding:.3rem; font-weight:700;" value="5" min="1" max="99" />
+                          <span style="color:var(--txt-muted);">turnos para morir</span>
+                        </div>
+                      </div>
                       <div>BE (Elocu.): <select id="add-max-be" class="cr-select" style="width:100%; padding:.2rem; font-size:.78rem;"><option value="-">-</option><option value="Menso">Menso</option><option value="Inútil">Inútil</option><option value="Tonto">Tonto</option><option value="Normal">Normal</option><option value="Listo">Listo</option><option value="Muy listo">Muy listo</option><option value="Brillante" selected>Brillante</option><option value="Excelso">Excelso</option><option value="Cumlaude">Cumlaude</option></select></div>
                       <div>BI (Intim.): <select id="add-max-bi" class="cr-select" style="width:100%; padding:.2rem; font-size:.78rem;"><option value="-">-</option><option value="Lucerito">Lucerito</option><option value="Gallina">Gallina</option><option value="Asustadizo">Asustadizo</option><option value="Normal">Normal</option><option value="Intimidante">Intimidante</option><option value="Muy intimidante">Muy intimidante</option><option value="Terrible" selected>Terrible</option><option value="Terrorífico">Terrorífico</option><option value="Demoníaco">Demoníaco</option></select></div>
                       <div>Coste Enem: <input type="number" id="add-max-ce" class="cr-attr-in" value="40" /></div>
@@ -3573,8 +3593,8 @@ calculate();
         "Ataque tajo (ataque específico).",
         "Ataque con garras y dientes."
       ],
-      min: { label: "Nivel 1 (Débil)", BO: 10, BD: 15, BL: 20, BM: 0, BDM: 10, MM: 15, BE: "Muy listo", BI: "Intimidante", INI: 0, pvMin: 15, pvMax: 20, costEnemy: 80, costPlayer: 30, costPlayerEffect: "1d20 pv" },
-      max: { label: "Demasiado Fuerte", BO: 120, BD: 115, BL: 140, BM: 0, BDM: 90, MM: 75, BE: "Brillante", BI: "Terrible", INI: 0, pvMin: 60, pvMax: 70, costEnemy: 40, costPlayer: 50, costPlayerEffect: "1d10 pv" }
+      min: { label: "Nivel 1 (Débil)", BO: 10, BD: 15, BL: 20, BM: 0, BDM: 10, MM: 15, BE: "Muy listo", BI: "Intimidante", INI: 0, pvMin: 1, pvMax: 2, costEnemy: 80, costPlayer: 30, costPlayerEffect: "1d20 pv" },
+      max: { label: "Demasiado Fuerte", BO: 120, BD: 115, BL: 140, BM: 0, BDM: 90, MM: 75, BE: "Brillante", BI: "Terrible", INI: 0, pvMin: 3, pvMax: 4, costEnemy: 40, costPlayer: 50, costPlayerEffect: "1d10 pv" }
     },
     {
       id: "estatua_fuego",
@@ -3605,8 +3625,8 @@ calculate();
         "Si atrapa a un PJ, cada turno preso perderá un equipo al azar y recibirá un crítico B de corrosión.",
         "Salir del cubo, cada turno, requiere una MM de entre 85 y 150 según la situación."
       ],
-      min: { label: "Nivel Base", BO: null, BD: null, BL: null, BM: null, BDM: null, MM: 15, BE: "-", BI: "Terrible", INI: 0, pvMin: 50, pvMax: 80, costEnemy: 70, costPlayer: 40, costPlayerEffect: "Especial" },
-      max: { label: "Demasiado Fuerte", BO: null, BD: null, BL: null, BM: null, BDM: null, MM: 50, BE: "-", BI: "Demoníaco", INI: 0, pvMin: 150, pvMax: 200, costEnemy: 40, costPlayer: 60, costPlayerEffect: "Especial" }
+      min: { label: "Nivel Base", BO: null, BD: null, BL: null, BM: null, BDM: null, MM: 15, BE: "-", BI: "Terrible", INI: 0, pvMin: 3, pvMax: 4, costEnemy: 70, costPlayer: 40, costPlayerEffect: "Especial" },
+      max: { label: "Demasiado Fuerte", BO: null, BD: null, BL: null, BM: null, BDM: null, MM: 50, BE: "-", BI: "Demoníaco", INI: 0, pvMin: 6, pvMax: 8, costEnemy: 40, costPlayer: 60, costPlayerEffect: "Especial" }
     },
     {
       id: "ogro",
@@ -3618,8 +3638,8 @@ calculate();
         "Ataque contundente (incluso con las manos desnudas).",
         "Aporrear: Si el PJ no supera una MM por determinar, lo agarrará de una pierna y lo golpeará 3 veces contra el suelo. Cada golpe supone 1 crítico B de impacto. Si el PJ saca 40 o menos en d100, perderá 1d4 objetos del inventario que saldrán despedidos."
       ],
-      min: { label: "Nivel Débil (1)", BO: 45, BD: 55, BL: 20, BM: 0, BDM: 30, MM: 10, BE: "Inútil", BI: "Intimidante", INI: 0, pvMin: 35, pvMax: 40, costEnemy: 65, costPlayer: 45, costPlayerEffect: "1d10 pv" },
-      max: { label: "Demasiado Fuerte", BO: 220, BD: 225, BL: 240, BM: 0, BDM: 190, MM: 75, BE: "Normal", BI: "Terrorífico", INI: 0, pvMin: 120, pvMax: 150, costEnemy: 30, costPlayer: 85, costPlayerEffect: "1d6 pv" }
+      min: { label: "Nivel Débil (1)", BO: 45, BD: 55, BL: 20, BM: 0, BDM: 30, MM: 10, BE: "Inútil", BI: "Intimidante", INI: 0, pvMin: 2, pvMax: 3, costEnemy: 65, costPlayer: 45, costPlayerEffect: "1d10 pv" },
+      max: { label: "Demasiado Fuerte", BO: 220, BD: 225, BL: 240, BM: 0, BDM: 190, MM: 75, BE: "Normal", BI: "Terrorífico", INI: 0, pvMin: 5, pvMax: 6, costEnemy: 30, costPlayer: 85, costPlayerEffect: "1d6 pv" }
     }
   ];
 
@@ -3830,7 +3850,22 @@ calculate();
     var iBI  = bestiaryLerp(L.BI,  H.BI,  factor);
     var iINI = bestiaryLerp(L.INI !== undefined ? L.INI : 0, H.INI !== undefined ? H.INI : 0, factor);
 
-    var resStr = monster.asaltos || (L.isIndestructible ? 'Indestructible' : (pvStr !== 'Indestructible' ? (pvStr + ' asaltos con daño') : '2 – 4 asaltos con daño'));
+    var resStr = '';
+    if (L.isIndestructible) {
+      resStr = '♾️ Indestructible';
+    } else if (L.pvMin !== null && L.pvMin !== undefined) {
+      var r1 = bestiaryLerp(L.pvMin, H.pvMin, factor);
+      var r2 = bestiaryLerp(L.pvMax, H.pvMax, factor);
+      resStr = r1 === r2 ? (r1 + ' asaltos recibiendo daño') : (r1 + ' – ' + r2 + ' asaltos recibiendo daño');
+    } else if (monster.asaltos) {
+      resStr = monster.asaltos;
+    } else {
+      resStr = '2 – 4 asaltos recibiendo daño';
+    }
+
+    var costEnemy  = (L.costEnemy !== null && L.costEnemy !== undefined) ? bestiaryLerp(L.costEnemy, H.costEnemy, factor) : '-';
+    var costPlayer = (L.costPlayer !== null && L.costPlayer !== undefined) ? bestiaryLerp(L.costPlayer, H.costPlayer, factor) : '-';
+    var costEffect = factor > 0.5 ? H.costPlayerEffect : L.costPlayerEffect;
 
     var fmt = function(v) { return (v === '-' || v === null || v === undefined) ? '—' : (typeof v === 'number' && v > 0 ? '+' + v : String(v)); };
 
@@ -3865,7 +3900,7 @@ calculate();
     }
   }
 
-    function resetAddMonsterForm() {
+  function resetAddMonsterForm() {
     var form = document.getElementById('form-add-monster');
     if (form) form.reset();
     var editId = document.getElementById('add-m-edit-id');
@@ -3874,6 +3909,10 @@ calculate();
     if (titleEl) titleEl.textContent = '➕ Formulario para Registrar Nueva Criatura';
     var btnTextEl = document.getElementById('add-m-btn-text');
     if (btnTextEl) btnTextEl.textContent = '💾 Guardar Monstruo en el Bestiario';
+    if (document.getElementById('add-min-pv1')) document.getElementById('add-min-pv1').value = 1;
+    if (document.getElementById('add-min-pv2')) document.getElementById('add-min-pv2').value = 2;
+    if (document.getElementById('add-max-pv1')) document.getElementById('add-max-pv1').value = 4;
+    if (document.getElementById('add-max-pv2')) document.getElementById('add-max-pv2').value = 5;
   }
   window.resetAddMonsterForm = resetAddMonsterForm;
 
@@ -3899,8 +3938,25 @@ calculate();
     document.getElementById('add-min-bdm').value = L.BDM !== undefined ? L.BDM : 10;
     document.getElementById('add-min-mm').value  = L.MM  !== undefined ? L.MM  : 15;
     if (document.getElementById('add-min-ini')) document.getElementById('add-min-ini').value = L.INI !== undefined ? L.INI : 0;
-    document.getElementById('add-min-pv1').value = L.pvMin !== undefined ? L.pvMin : 15;
-    document.getElementById('add-min-pv2').value = L.pvMax !== undefined ? L.pvMax : 20;
+
+    var minR1 = L.pvMin !== undefined ? L.pvMin : 1;
+    var minR2 = L.pvMax !== undefined ? L.pvMax : 2;
+    var maxR1 = H.pvMin !== undefined ? H.pvMin : 4;
+    var maxR2 = H.pvMax !== undefined ? H.pvMax : 5;
+    if (minR1 > 20 || minR2 > 20) {
+      if (monster.asaltos) {
+        var nums = monster.asaltos.match(/\d+/g);
+        if (nums && nums.length >= 2) { minR1 = parseInt(nums[0]); minR2 = parseInt(nums[1]); }
+        else if (nums && nums.length === 1) { minR1 = parseInt(nums[0]); minR2 = parseInt(nums[0]); }
+        else { minR1 = 1; minR2 = 2; }
+      } else {
+        minR1 = 1; minR2 = 2;
+      }
+      maxR1 = Math.max(minR1 + 2, 3);
+      maxR2 = Math.max(minR2 + 2, 4);
+    }
+    document.getElementById('add-min-pv1').value = minR1;
+    document.getElementById('add-min-pv2').value = minR2;
     document.getElementById('add-min-ce').value  = L.costEnemy !== undefined ? L.costEnemy : 80;
     document.getElementById('add-min-cj').value  = L.costPlayer !== undefined ? L.costPlayer : 30;
     if (document.getElementById('add-min-be')) document.getElementById('add-min-be').value = L.BE || 'Normal';
@@ -3913,8 +3969,8 @@ calculate();
     document.getElementById('add-max-bdm').value = H.BDM !== undefined ? H.BDM : 90;
     document.getElementById('add-max-mm').value  = H.MM  !== undefined ? H.MM  : 75;
     if (document.getElementById('add-max-ini')) document.getElementById('add-max-ini').value = H.INI !== undefined ? H.INI : 0;
-    document.getElementById('add-max-pv1').value = H.pvMin !== undefined ? H.pvMin : 60;
-    document.getElementById('add-max-pv2').value = H.pvMax !== undefined ? H.pvMax : 70;
+    document.getElementById('add-max-pv1').value = maxR1;
+    document.getElementById('add-max-pv2').value = maxR2;
     document.getElementById('add-max-ce').value  = H.costEnemy !== undefined ? H.costEnemy : 40;
     document.getElementById('add-max-cj').value  = H.costPlayer !== undefined ? H.costPlayer : 50;
     if (document.getElementById('add-max-be')) document.getElementById('add-max-be').value = H.BE || 'Brillante';
@@ -3962,13 +4018,17 @@ calculate();
     var iINI = L.INI !== undefined ? L.INI : 0;
 
     var asaltosStr = '';
-    if (monster.asaltos) {
-      asaltosStr = monster.asaltos;
-    } else if (L.isIndestructible) {
+    if (L.isIndestructible) {
       asaltosStr = '♾️ Indestructible';
-    } else if (L.pvMin !== null && L.pvMin !== undefined) {
+    } else if (L.pvMin !== null && L.pvMin !== undefined && L.pvMin <= 20) {
       var pv1 = bestiaryLerp(L.pvMin, H.pvMin, factor);
       var pv2 = bestiaryLerp(L.pvMax, H.pvMax, factor);
+      asaltosStr = pv1 === pv2 ? (pv1 + ' asaltos recibiendo daño') : (pv1 + ' – ' + pv2 + ' asaltos recibiendo daño');
+    } else if (monster.asaltos) {
+      asaltosStr = monster.asaltos;
+    } else if (L.pvMin !== null && L.pvMin !== undefined) {
+      var pv1 = Math.max(1, Math.round(bestiaryLerp(L.pvMin, H.pvMin, factor) / 15));
+      var pv2 = Math.max(pv1, Math.round(bestiaryLerp(L.pvMax, H.pvMax, factor) / 15));
       asaltosStr = pv1 === pv2 ? (pv1 + ' asaltos recibiendo daño') : (pv1 + ' – ' + pv2 + ' asaltos recibiendo daño');
     } else {
       asaltosStr = '2 – 4 asaltos recibiendo daño';
@@ -4190,8 +4250,8 @@ calculate();
             INI: parseInt(document.getElementById('add-min-ini') ? document.getElementById('add-min-ini').value : 0) || 0,
             BE: document.getElementById('add-min-be') ? document.getElementById('add-min-be').value : 'Normal',
             BI: document.getElementById('add-min-bi') ? document.getElementById('add-min-bi').value : 'Normal',
-            pvMin: parseInt(document.getElementById('add-min-pv1').value) || 20,
-            pvMax: parseInt(document.getElementById('add-min-pv2').value) || 30,
+            pvMin: parseInt(document.getElementById('add-min-pv1').value) || 1,
+            pvMax: parseInt(document.getElementById('add-min-pv2').value) || 2,
             costEnemy:  parseInt(document.getElementById('add-min-ce').value) || 80,
             costPlayer: parseInt(document.getElementById('add-min-cj').value) || 30,
             costPlayerEffect: '1d10 pv'
@@ -4207,8 +4267,8 @@ calculate();
             INI: parseInt(document.getElementById('add-max-ini') ? document.getElementById('add-max-ini').value : 0) || 0,
             BE: document.getElementById('add-max-be') ? document.getElementById('add-max-be').value : 'Brillante',
             BI: document.getElementById('add-max-bi') ? document.getElementById('add-max-bi').value : 'Terrible',
-            pvMin: parseInt(document.getElementById('add-max-pv1').value) || 80,
-            pvMax: parseInt(document.getElementById('add-max-pv2').value) || 100,
+            pvMin: parseInt(document.getElementById('add-max-pv1').value) || 4,
+            pvMax: parseInt(document.getElementById('add-max-pv2').value) || 5,
             costEnemy:  parseInt(document.getElementById('add-max-ce').value) || 40,
             costPlayer: parseInt(document.getElementById('add-max-cj').value) || 60,
             costPlayerEffect: '1d10 pv'
@@ -5168,6 +5228,16 @@ calculate();
     };
     const description = `${descMap[tKey] || ''} ${rankLabel} de ${nivelLabel}.`;
 
+    let rMin = 2, rMax = 4;
+    const aNums = asaltosStr.match(/\d+/g);
+    if (aNums && aNums.length >= 2) {
+      rMin = parseInt(aNums[0]);
+      rMax = parseInt(aNums[1]);
+    } else if (aNums && aNums.length === 1) {
+      rMin = parseInt(aNums[0]);
+      rMax = parseInt(aNums[0]);
+    }
+
     lastGenerated = {
       id: 'genmon_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
       name: monsterName,
@@ -5177,8 +5247,8 @@ calculate();
       actions,
       specials,
       asaltos: asaltosText,
-      min: { label:'Nivel Base', BO:bo, BD:bd, BL:bl, BM:bm, BDM:bdm, MM:mm, INI:ini, BE:beTier, BI:biTier, pvMin:pvFinal, pvMax:Math.round(pvFinal*1.2), isIndestructible:false, asaltos:asaltosText, costEnemy:N.costE, costPlayer:N.costP, costPlayerEffect:'1d20 pv' },
-      max: { label:'Nivel Max', BO:Math.round(bo*1.4), BD:Math.round(bd*1.4), BL:Math.round(bl*1.3), BM:Math.round(bm*1.3), BDM:Math.round(bdm*1.4), MM:Math.min(100,Math.round(mm*1.2)), INI:Math.round(ini*1.3), BE:getBELabel(beVal+30), BI:getBILabel(biVal+30), pvMin:Math.round(pvFinal*1.5), pvMax:Math.round(pvFinal*1.8), isIndestructible:false, asaltos:asaltosText, costEnemy:Math.max(10,N.costE-15), costPlayer:N.costP+15, costPlayerEffect:'1d20 pv' }
+      min: { label:'Nivel Base', BO:bo, BD:bd, BL:bl, BM:bm, BDM:bdm, MM:mm, INI:ini, BE:beTier, BI:biTier, pvMin:rMin, pvMax:rMax, isIndestructible:false, asaltos:asaltosText, costEnemy:N.costE, costPlayer:N.costP, costPlayerEffect:'1d20 pv' },
+      max: { label:'Nivel Max', BO:Math.round(bo*1.4), BD:Math.round(bd*1.4), BL:Math.round(bl*1.3), BM:Math.round(bm*1.3), BDM:Math.round(bdm*1.4), MM:Math.min(100,Math.round(mm*1.2)), INI:Math.round(ini*1.3), BE:getBELabel(beVal+30), BI:getBILabel(biVal+30), pvMin:Math.max(rMin+2, Math.round(rMin*1.5)), pvMax:Math.max(rMax+2, Math.round(rMax*1.5)), isIndestructible:false, asaltos:asaltosText, costEnemy:Math.max(10,N.costE-15), costPlayer:N.costP+15, costPlayerEffect:'1d20 pv' }
     };
 
     renderGeneratedCard(lastGenerated, E.color);
